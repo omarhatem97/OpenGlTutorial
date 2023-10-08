@@ -2,7 +2,40 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <string>
+#include <sstream>
+#include <fstream>
 
+struct source
+{
+  std::string vertexShader;
+  std::string fragmentShader;
+};
+
+static source parseShader(const std::string& filepath) {
+  std::ifstream stream(filepath);
+  std::string line;
+  std::stringstream ss[2];
+
+  enum ShaderType {
+    NONE = -1, VERTEX = 0, FRAGMENT = 1
+  };
+  ShaderType type = ShaderType::NONE;
+
+  while(getline(stream, line)) {
+    if(line.find("#shader") != std::string::npos) {
+      if(line.find("vertex") != std::string::npos)
+        type = ShaderType::VERTEX;
+      else if(line.find("fragment") != std::string::npos)
+        type = ShaderType::FRAGMENT;
+    }
+    else {
+      ss[type] << line << "\n";
+    }
+  }
+
+  return {ss[0].str(), ss[1].str()};
+}
 
 static unsigned int compileShader(unsigned int type, const std::string& source) {
     //creating shaders
@@ -62,25 +95,12 @@ int main(void) {
   /* Make the window's context current */
   glfwMakeContextCurrent(window);
 
+  /* load glad */
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     std::cout << "Couldn't load opengl\n";
     glfwTerminate();
     return -1;
   }
-
-    std::string vertexShader = 
-    "#version 330 core\n"
-    "layout(location = 0) in vec4 position;\n"
-    "void main() {\n"
-    "gl_position = position;\n"
-    "}\n";
-
-    std::string fragmentShader = 
-    "#version 330 core\n"
-    "layout(location = 0) out vec4 color;\n"
-    "void main() {\n"
-    "color = vec4(1.0, 0.0, 0.0, 1.0);\n"
-    "}\n";
 
     float positions[6] = {
         -0.5f, 0.0f,
@@ -95,7 +115,11 @@ int main(void) {
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    unsigned int shader = createShader(vertexShader, fragmentShader);
+    auto source  = parseShader("/home/avidbeam/Dev/OpenGl/res/shaders/basic.shader");
+    std::cout << "vertex\n" << source.vertexShader <<std::endl;
+    std::cout << "fragment\n" << source.fragmentShader <<std::endl;
+
+    unsigned int shader = createShader(source.vertexShader, source.fragmentShader);
     glUseProgram(shader);
   /* Loop until the user closes the window */
   while (!glfwWindowShouldClose(window)) {
@@ -111,6 +135,7 @@ int main(void) {
     glfwPollEvents();
   }
 
+  glDeleteProgram(shader);
   glfwTerminate();
   return 0;
 }
