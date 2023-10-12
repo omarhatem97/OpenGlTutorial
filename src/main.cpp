@@ -6,25 +6,9 @@
 #include <sstream>
 #include <string>
 
-#define ASSERT(x) if(!(x)) __debugbreak();;
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-
-
-static bool GLLogCall(const char* function, const char* file, int line) {
-    while (GLenum error = glGetError())
-    {
-        std::cout << "[OpenGL Error] (" << error << "): " << function << " " << file << ":" << line << std::endl;
-        return false;
-    }
-    return true;
-}
-
-static void GLClearError() {
-    while (glGetError() != GL_NO_ERROR);
-}
-
+#include "Renderer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 struct source
 {
@@ -106,6 +90,11 @@ static unsigned int createShader(const std::string& vertexShader, const std::str
 
 
 int main(void) {
+  // Setting opengl version 3.3, core profile
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
   GLFWwindow* window;
 
   /* Initialize the library */
@@ -129,7 +118,7 @@ int main(void) {
   }
 
   std::cout << glGetString(GL_VERSION) << std::endl;
-
+{
     //vertices of the triangle
     float positions[] = {
         -0.5f, 0.0f, // 0
@@ -144,20 +133,17 @@ int main(void) {
         2, 3, 0
     };
 
-    // vertex buffer
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
+    unsigned int vao;
+    GLCall(glGenVertexArrays(1, &vao));
+    GLCall(glBindVertexArray(vao));
 
-    glEnableVertexAttribArray(0);
+    VertexBuffer vb (positions, sizeof(positions));
+
+
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    glEnableVertexAttribArray(0);
 
-    // index buffers
-    unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    IndexBuffer ib(indices, 6);
 
     // shaders
     auto source = parseShader("res/shaders/basic.shader");
@@ -177,6 +163,8 @@ int main(void) {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        GLCall(glBindVertexArray(vao));
+        GLCall(ib.bind());
         //glDrawArrays(GL_TRIANGLES, 0, 3);
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
@@ -188,7 +176,7 @@ int main(void) {
     }
 
     glDeleteProgram(shader);
+}
     glfwTerminate();
     return 0;
-
 }
