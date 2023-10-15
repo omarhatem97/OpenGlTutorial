@@ -17,7 +17,7 @@ struct VertexBufferElement {
         case GL_UNSIGNED_INT: return 5; break;
         case GL_UNSIGNED_BYTE: return 1; break;
         }
-        ASSERT(false)
+        ASSERT(false);
         return 0;
     }
 };
@@ -38,7 +38,7 @@ public:
 
     template<typename T>
     void push(unsigned int count) {
-        static_assert(false);
+        // static_assert(false);
     }
 
     template<>
