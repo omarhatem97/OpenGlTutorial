@@ -1,3 +1,4 @@
+#pragma once
 #ifdef __GNUC__
     #define DEBUG_BREAK() __builtin_trap()
 #else
