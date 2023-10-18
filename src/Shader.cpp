@@ -42,7 +42,7 @@ ShaderSource Shader::parseShader(const std::string& filepath) {
 
   if (!stream.is_open()) {
     std::cerr << "Failed to open shader file: " << filepath << std::endl;
-    return {"", ""};  // Return empty strings to handle the error
+    return {"", ""}; // Return empty strings to handle the error
   }
 
   std::string line;

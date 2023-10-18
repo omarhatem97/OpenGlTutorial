@@ -45,8 +45,8 @@ int main(void) {
 {
     //vertices of the triangle
     float positions[] = {
-        -0.5f, 0.0f, // 0
-         0.5f, 0.0f, // 1
+        -0.5f, -0.05f, // 0
+         0.5f, -0.5f, // 1
          0.5f, 0.5f, // 2
         -0.5f, 0.5f  // 3
     };
@@ -64,7 +64,7 @@ int main(void) {
     VertexArray va;
     VertexBuffer vb (positions, sizeof(positions));
     VertexBufferLayout layout;
-    layout.push<float>(2);
+    layout.pushFloat(2);
     va.addBuffer(vb, layout);
 
     IndexBuffer ib(indices, 6);
@@ -72,6 +72,7 @@ int main(void) {
     // shaders
     Shader shader("res/shaders/basic.shader");
     shader.bind();
+    shader.setUniform4f("u_Color", 1.0f, 0.0f, 0.0f, 0.0f);
 
     vb.unbind();
     ib.unbind();
@@ -84,6 +85,7 @@ int main(void) {
 
         GLCall(va.bind());
         GLCall(ib.bind());
+        GLCall(vb.bind());
         GLCall(shader.bind());
         //glDrawArrays(GL_TRIANGLES, 0, 3);
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));

@@ -20,11 +20,12 @@ class Shader {
   unsigned int getUnifromLocation(const std::string& name);
 
  private:
+  ShaderSource parseShader(const std::string& filepath);
+  unsigned int compileShader(unsigned int type, const std::string& source);
+  unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader);
+
   unsigned int m_rendererId;
   std::string m_filePath;
   std::unordered_map<std::string, int> m_uniformLocationCache;
 
-  ShaderSource parseShader(const std::string& filepath);
-  unsigned int compileShader(unsigned int type, const std::string& source);
-  unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader);
 };
